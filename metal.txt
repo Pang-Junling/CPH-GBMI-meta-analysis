@@ -1,0 +1,48 @@
+# Meta-analysis weighted by standard error does not work well
+# because different studies used very different transformations
+ SCHEME	STDERR
+
+# Not sure if genomic control is a good idea, given the large
+# number of true associations in these three regions ...
+# GENOMICCONTROL ON
+
+# To help identify allele flips, it can be useful to track
+# allele frequencies in the meta-analysis.
+AVERAGEFREQ	ON
+MINMAXFREQ	ON
+
+# keep track of the sample size
+CUSTOMVARIABLE	TotalSampleSize
+LABEL TotalSampleSize as N
+
+SEPARATOR	TAB
+MARKER	SNP
+WEIGHT	N
+ALLELE	A1 A2
+FREQLABEL	AF1
+EFFECT	BETA
+STDERRLABEL	SE
+PVALUELABEL	P
+
+PROCESS auto_chrX_merge_assoc.fastGWA     ### CPH GWAS summary
+
+SEPARATOR	TAB
+MARKER	CPHS_ID
+ALLELE	ALT REF
+FREQLABEL	all_meta_AF
+WEIGHT	N
+EFFECT	inv_var_meta_beta
+STDERRLABEL	inv_var_meta_sebeta
+PVALUELABEL	inv_var_meta_p
+
+PROCESS COPD_Bothsex_inv_var_meta_GBMI_052021_nbbkgt1.newSNPID.txt    ### GBMI-meta-analysis-summary
+
+ANALYZE
+
+#This command will take a little longer to run, because it requires each input
+#file to be examined twice. The METAL heterogeneity analysis requires a second
+#pass of analysis to decide whether observed effect sizes (or test statistics)
+#are homogeneous across samples. The resulting heterogeneity statistic has n-1
+#degrees of freedom for n samples.
+ANALYZE HETEROGENEITY
+
